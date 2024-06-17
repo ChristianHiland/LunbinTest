@@ -1,0 +1,194 @@
+00001  0000             ; 10 SYS4096
+00002  0001             
+00003  0001             *=$1000
+00004  1000             
+00005  1000             START
+00006  1000  78                    SEI                     ; DISABLE INTERRUPTS
+00007  1001             
+00008  1001  A9 7F                 LDA #$7F                ; DISABLE CIA TIMER INTERRUPT
+00009  1003  8D 0D DC              STA $DC0D
+00010  1006  8D 0D DD              STA $DD0D
+00011  1009             
+00012  1009                        ; SETTING UP A RASTER INTERRUPT TO HAPPEN AT LINE 100 (SCREEN)
+00013  1009             
+00014  1009             
+00015  1009  A9 7F                 LDA #$7F
+00016  100B  2D 11 D0              AND $D011
+00017  100E  8D 11 D0              STA $D011
+00018  1011             
+00019  1011  A9 64                 LDA #100
+00020  1013  8D 12 D0              STA $D012
+00021  1016             
+00022  1016  A9 85                 LDA #<MUSIC_INTERRUPT
+00023  1018  8D 14 03              STA $0314
+00024  101B  A9 10                 LDA #>MUSIC_INTERRUPT
+00025  101D  8D 15 03              STA $0315
+00026  1020             
+00027  1020                        
+00028  1020  A9 01                 LDA #$01                ; ENABLE RASTER INTERRUPT
+00029  1022  8D 1A D0              STA $D01A
+00030  1025             
+00031  1025                        ; INIT MUSIC
+00032  1025  A9 00                 LDA #0
+00033  1027  AA                    TAX
+00034  1028  A8                    TAY
+00035  1029  20 91 CC              JSR MUSIC_PLAYER
+00036  102C             
+00037  102C  58                    CLI                     ; ENABLE INTERRUPTS
+00038  102D             
+00039  102D             ; MAIN LOOP FOR THE GAME
+00040  102D             MAIN_LOOP
+00041  102D  4C 2D 10              JMP MAIN_LOOP
+00042  1030             
+00043  1030             TEXT_DISPLAY 
+00044  1030                        ; SET BIT 0 IN INTERRUPT STATUS REGISTER TO ACKNOWLEDGE RASTER INTERRUPT
+00045  1030  EE 19 D0              INC $D019
+00046  1033                        
+00047  1033                        ; ACTUAL CODE GOES HERE
+00048  1033                        ; ----------------------------------------------------------------------
+00049  1033  EE 20 D0              INC $D020
+00050  1036             
+00051  1036             
+00052  1036  A9 01                 LDA #1
+00053  1038  8D FF 03              STA 1023
+00054  103B  A9 02                 LDA #2
+00055  103D  8D 00 04              STA 1024
+00056  1040  A9 03                 LDA #3
+00057  1042  8D 01 04              STA 1025
+00058  1045  A9 04                 LDA #4
+00059  1047  8D 02 04              STA 1026
+00060  104A  A9 05                 LDA #5
+00061  104C  8D 03 04              STA 1027
+00062  104F  A9 06                 LDA #6
+00063  1051  8D 04 04              STA 1028
+00064  1054  A9 07                 LDA #7
+00065  1056  8D 05 04              STA 1029
+00066  1059  A9 08                 LDA #8
+00067  105B  8D 06 04              STA 1030
+00068  105E  A9 09                 LDA #9
+00069  1060  8D 07 04              STA 1031
+00070  1063  A9 0A                 LDA #10
+00071  1065  8D 08 04              STA 1032
+00072  1068             
+00073  1068                        ; TESTING IF THE ASM I THINK WILL WORK
+00074  1068                        ;LDX #11
+00075  1068                        ;STA 1032, X
+00076  1068             
+00077  1068  CE 20 D0              DEC $D020
+00078  106B                        ;-----------------------------------------------------------------------
+00079  106B             
+00080  106B             
+00081  106B             
+00082  106B  A9 7F                 LDA #$7F
+00083  106D  2D 11 D0              AND $D011
+00084  1070  8D 11 D0              STA $D011
+00085  1073             
+00086  1073  A9 64                 LDA #100
+00087  1075  8D 12 D0              STA $D012
+00088  1078             
+00089  1078  A9 85                 LDA #<MUSIC_INTERRUPT
+00090  107A  8D 14 03              STA $0314
+00091  107D  A9 10                 LDA #>MUSIC_INTERRUPT
+00092  107F  8D 15 03              STA $0315
+00093  1082             
+00094  1082             
+00095  1082                        ; RESTORE A, X & Y REGISTERS AND CPU FLAGS BEFORE RETURING FROM INTERRUPT.
+00096  1082  4C 81 EA              JMP $EA81
+00097  1085             
+00098  1085             ; MUSIC INTERRUPT
+00099  1085             MUSIC_INTERRUPT 
+00100  1085                        ; SET BIT 0 IN INTERRUPT STATUS REGISTER TO ACKNOWLEDGE RASTER INTERRUPT
+00101  1085  EE 19 D0              INC $D019
+00102  1088             
+00103  1088                        ; ACTUAL CODE GOES HERE
+00104  1088                        ; ----------------------------------------------------------------------
+00105  1088  EE 20 D0              INC $D020
+00106  108B             
+00107  108B                        ; PLAY MUSIC
+00108  108B             
+00109  108B             
+00110  108B                        
+00111  108B  20 13 CD              JSR MUSIC_PLAYER + $82
+00112  108E             
+00113  108E             
+00114  108E  CE 20 D0              DEC $D020
+00115  1091                        ;-----------------------------------------------------------------------
+00116  1091             
+00117  1091             
+00118  1091             
+00119  1091  A9 7F                 LDA #$7F
+00120  1093  2D 11 D0              AND $D011
+00121  1096  8D 11 D0              STA $D011
+00122  1099             
+00123  1099  A9 C8                 LDA #200
+00124  109B  8D 12 D0              STA $D012
+00125  109E             
+00126  109E  A9 30                 LDA #<TEXT_DISPLAY
+00127  10A0  8D 14 03              STA $0314
+00128  10A3  A9 10                 LDA #>TEXT_DISPLAY
+00129  10A5  8D 15 03              STA $0315
+00130  10A8             
+00131  10A8             
+00132  10A8                        ; RESTORE A, X & Y REGISTERS AND CPU FLAGS BEFORE RETURING FROM INTERRUPT.
+00133  10A8  4C 81 EA              JMP $EA81
+00134  10AB             
+00135  10AB             ; SETUPRASTERINTERRUPT MACRO - PARAMS: RASTER LINE #, POINTER TO CODE
+00136  10AB             
+00137  10AB             DEFM       SETUPRASTERINTERRUPT
+00138  10AB             
+00139  10AB                        LDA #$7F                ; CLEAR HIGH BIT OF RASTER LINE
+00140  10AB                        AND $D011
+00141  10AB                        STA $D011
+00142  10AB             
+00143  10AB                        LDA #/1                ; SET RASTER INTERRUPT TO TRIGGER ON LINE
+00144  10AB                        STA $D012
+00145  10AB             
+00146  10AB                        LDA #</2                ; SET POINTER FOR RASTER INTERRUPT
+00147  10AB                        STA $0314
+00148  10AB                        LDA #>/2
+00149  10AB                        STA $0315
+00150  10AB             
+00151  10AB                        ENDM
+00152  10AB             DEFM       PLAYWULFPACK
+00153  10AB                        
+00154  10AB                        JSR MUSIC_PLAYER + $82
+00155  10AB             
+00156  10AB                        ENDM
+00157  10AB             DEFM       PLAYPANIC
+00158  10AB             
+00159  10AB                        JSR MUSIC_PLAYER2 + $43FF
+00160  10AB             
+00161  10AB                        ENDM
+00162  10AB             
+00163  10AB             *=$CC91
+00164  CC91             MUSIC_PLAYER 
+00165  CC91             INCBIN     "SID SETTINGS\WULFPACK.SID", $7E   ; WULFPACK CODE AND DATA
+00166  CFAD             
+00167  CFAD             *=$2500
+00168  2500             MUSIC_PLAYER2 
+00169  2500             INCBIN     "SID SETTINGS\PANIC25.SID", $7E    ; PANIC CODE AND DATA
+00170  2778             
+00171  2778             
+00172  2778             
+00173  2778             
+00174  2778             
+00175  2778             
+00176  2778             
+
+******* 6 Label(s) *******
+main_loop = $102D 
+music_interrupt = $1085 
+music_player = $CC91 
+music_player2 = $2500 
+start = $1000 
+text_display = $1030 
+
+******* 2 Unused label(s) *******
+music_player2
+start
+
+******* 1 Variable(s) *******
+tgt_c64  = $0001
+******* 1 Unused variables(s) *******
+tgt_c64
+
